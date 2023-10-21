@@ -1,0 +1,30 @@
+<mat-card>
+  <mat-card-title><h1>Home</h1></mat-card-title>
+  <mat-card-content *ngIf="game$ | async as game">
+    <table>
+      <tbody>
+        <tr *ngFor="let row of game.board.grid">
+          <td *ngFor="let square of row">
+            <div class="square" [ngClass]="square.multiplier | multiplierClass">
+              <span class="label" *ngIf="square.multiplier as multiplier">
+                {{ multiplier.value
+                }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
+              </span>
+
+              <div
+                *ngIf="square.tile as tile"
+                class="tile"
+                [class.blank]="tile.isBlank"
+              >
+                <span class="letter">{{
+                  tile.isBlank ? "?" : tile.letter
+                }}</span
+                ><span class="value">{{ tile.value }}</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </mat-card-content>
+</mat-card>
