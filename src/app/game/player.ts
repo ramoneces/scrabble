@@ -275,6 +275,7 @@ export class Player {
   ): Move {
     const moveWord = this.buildMoveWord(word, wordTiles, wordSquares);
     return {
+      player: this,
       moveWord,
       connectedWords,
       score: moveWord.score + sumBy(connectedWords, (cw) => cw.score),

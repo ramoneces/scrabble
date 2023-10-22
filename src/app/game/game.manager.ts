@@ -64,6 +64,7 @@ export class GameManager {
   private applyMove(game: Game, player: Player, move: Move) {
     this.boardManager.placeMove(game, move);
     player.rack = player.rack.filter((t) => !move.moveWord.tiles.includes(t));
+    player.score += move.score;
   }
 
   private getRules(): Observable<ScrabbleRules> {

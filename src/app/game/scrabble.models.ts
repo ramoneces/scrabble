@@ -73,6 +73,7 @@ export interface ScrabbleRules {
 }
 
 export interface Move {
+  player: Player;
   moveWord: MoveWord;
   connectedWords: MoveWord[];
   score: number;

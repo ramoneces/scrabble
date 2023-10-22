@@ -1,0 +1,13 @@
+<mat-chip-listbox aria-label="Fish selection">
+  <mat-chip-option
+    color="accent"
+    selected
+    [matTooltip]="move.moveWord.word.definition ?? ''"
+    >{{ move.moveWord.word.text }}</mat-chip-option
+  >
+  <mat-chip-option
+    *ngFor="let subWord of move.connectedWords"
+    [matTooltip]="subWord.word.definition ?? ''"
+    >{{ subWord.word.text }}</mat-chip-option
+  >
+</mat-chip-listbox>

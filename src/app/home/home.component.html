@@ -1,33 +1,39 @@
-<mat-card>
-  <mat-card-title
-    ><h1>Home</h1>
-    <h2>Seed <input type="number" [(ngModel)]="randomSeed" /></h2
-  ></mat-card-title>
-  <mat-card-content *ngIf="game$ | async as game">
-    <table>
-      <tbody>
-        <tr *ngFor="let row of game.board.grid">
-          <td *ngFor="let square of row">
-            <div class="square" [ngClass]="square.multiplier | multiplierClass">
-              <span class="label" *ngIf="square.multiplier as multiplier">
-                {{ multiplier.value
-                }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
-              </span>
+<mat-card-title>
+  <h2>
+    Scrabble
+    <mat-form-field>
+      <mat-label>Seed</mat-label>
+      <input matInput type="number" [(ngModel)]="randomSeed" />
+    </mat-form-field>
+  </h2>
+</mat-card-title>
+<mat-card-content *ngIf="game$ | async as game">
+  <table class="board">
+    <tbody>
+      <tr *ngFor="let row of game.board.grid">
+        <td *ngFor="let square of row">
+          <div class="square" [ngClass]="square.multiplier | multiplierClass">
+            <span class="label" *ngIf="square.multiplier as multiplier">
+              {{ multiplier.value
+              }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
+            </span>
 
-              <div
-                *ngIf="square.tile as tile"
-                class="tile"
-                [class.blank]="tile.isBlank"
-              >
-                <span class="letter">{{
-                  tile.isBlank ? "?" : tile.letter
-                }}</span
-                ><span class="value">{{ tile.value }}</span>
-              </div>
+            <div
+              *ngIf="square.tile as tile"
+              class="tile"
+              [class.blank]="tile.isBlank"
+            >
+              <span class="letter">{{ tile.isBlank ? "?" : tile.letter }}</span
+              ><span class="value">{{ tile.value }}</span>
             </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </mat-card-content>
-</mat-card>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <mat-list>
+    <mat-list-item *ngFor="let move of game.moves">
+      <app-move-display [move]="move"></app-move-display
+    ></mat-list-item>
+  </mat-list>
+</mat-card-content>
