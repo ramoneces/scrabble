@@ -36,17 +36,34 @@ export class GameManager {
     game.players.forEach((player) => {
       player.takeTiles(this.tileSetManager.drawRandomTiles(game.tileSet, 7));
     });
-    game.players.forEach((player) => {
-      const move = player.getMove(game);
 
-      if (move && this.moveIsValid(game, move)) {
-        this.boardManager.placeMove(game, move);
-      }
-    });
+    let movesPlaced: boolean;
+    do {
+      movesPlaced = false;
+      game.players.forEach((player) => {
+        const move = player.getMove(game);
+        console.log(move);
+
+        if (move) {
+          this.applyMove(game, player, move);
+          player.takeTiles(
+            this.tileSetManager.drawRandomTiles(
+              game.tileSet,
+              game.rules.rackSize - player.rack.length
+            )
+          );
+          game.moves.push(move);
+          movesPlaced = true;
+        }
+      });
+    } while (movesPlaced);
+
+    console.log('Game over');
   }
 
-  private moveIsValid(game: Game, move: Move): boolean {
-    return true; // TODO
+  private applyMove(game: Game, player: Player, move: Move) {
+    this.boardManager.placeMove(game, move);
+    player.rack = player.rack.filter((t) => !move.moveWord.tiles.includes(t));
   }
 
   private getRules(): Observable<ScrabbleRules> {

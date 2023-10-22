@@ -75,6 +75,7 @@ export interface ScrabbleRules {
 export interface Move {
   moveWord: MoveWord;
   connectedWords: MoveWord[];
+  score: number;
 }
 
 export interface MoveWord {
