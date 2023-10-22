@@ -35,7 +35,7 @@ export class Player {
         mapMany(game.board.squares, (startingSquare) =>
           this.findWordsInDirection(
             game,
-            game.board.words.length === 0,
+            game.moves.length === 0,
             startingSquare,
             direction,
             game.lexicon.index
@@ -112,6 +112,7 @@ export class Player {
     wordIndex: WordIndex,
     previousWordTiles: Tile[] = [],
     previousWordSquares: Square[] = [],
+    previousWordLetters: string[] = [],
     rack: Tile[] = this.rack,
     tileFromRackUsed: boolean = false,
     wordIsAnchoredToBoard: boolean = false,
@@ -133,10 +134,13 @@ export class Player {
     const result: Move[] = [];
 
     let tiles: Tile[];
+    let usingTileFromRack: boolean;
     if (currentSquare.tile) {
+      usingTileFromRack = false;
       wordIsAnchoredToBoard = true; // A tile from the board is used in the word
       tiles = [currentSquare.tile];
     } else {
+      usingTileFromRack = true;
       tileFromRackUsed = true;
       tiles = rack;
       if (isFirstMove && currentSquare.isStartingSquare) {
@@ -144,72 +148,89 @@ export class Player {
       }
     }
 
-    tiles.forEach((tile) => {
-      const indexPosition = wordIndex[tile.letter];
-
-      if (!indexPosition) {
-        return;
+    for (const tile of tiles) {
+      let letters: string[];
+      if (usingTileFromRack && tile.isBlank) {
+        letters = Object.keys(wordIndex);
+      } else {
+        letters = [tile.letter];
       }
 
-      const currentConnectedWords = [...previousConnectedWords];
-      if (!currentSquare.tile) {
-        // If the tile is not from the board new connected words can be formed
-        const connectedWordResult: {
-          wordFound: boolean;
-          connectedWord?: MoveWord;
-        } = this.searchConnectedWord(game.lexicon, tile, currentSquare, d);
+      for (const letter of letters) {
+        const indexPosition = wordIndex[letter];
 
-        if (connectedWordResult.wordFound) {
-          if (!connectedWordResult.connectedWord) {
-            // An erroneus connected word was found
-            return;
-          }
-
-          currentConnectedWords.push(connectedWordResult.connectedWord);
-          wordIsAnchoredToBoard = true; // A connected word was found
+        if (!indexPosition) {
+          continue;
         }
-      }
 
-      const currentWordTiles = [...previousWordTiles, tile];
-      const currentWordSquares = [...previousWordSquares, currentSquare];
-      const remainingRack = rack.filter((t) => t !== tile);
-
-      // If the word exists, at least a tile form rack was used and the next square is empty, we have a valid word
-      if (
-        indexPosition?.word &&
-        tileFromRackUsed &&
-        !currentSquare.next[d]?.tile
-      ) {
-        // The word needs to use a letter from the board or be connected to another word or overlap starting square in the first move
-        if (wordIsAnchoredToBoard) {
-          // A valid word was found
-          result.push(
-            this.buildMove(
-              indexPosition.word,
-              currentWordTiles,
-              currentWordSquares,
-              currentConnectedWords
-            )
+        const currentConnectedWords = [...previousConnectedWords];
+        if (usingTileFromRack) {
+          // If the tile is not from the board new connected words can be formed
+          const connectedWordResult: {
+            wordFound: boolean;
+            connectedWord?: MoveWord;
+          } = this.searchConnectedWord(
+            game.lexicon,
+            tile,
+            letter,
+            currentSquare,
+            d
           );
-        }
-      }
 
-      result.push(
-        ...this.findWordsInDirection(
-          game,
-          isFirstMove,
-          currentSquare.next[d],
-          d,
-          indexPosition,
-          currentWordTiles,
-          currentWordSquares,
-          remainingRack,
-          tileFromRackUsed,
-          wordIsAnchoredToBoard,
-          currentConnectedWords
-        )
-      );
-    });
+          if (connectedWordResult.wordFound) {
+            if (!connectedWordResult.connectedWord) {
+              // An erroneus connected word was found
+              continue;
+            }
+
+            currentConnectedWords.push(connectedWordResult.connectedWord);
+            wordIsAnchoredToBoard = true; // A connected word was found
+          }
+        }
+
+        const currentWordTiles = [...previousWordTiles, tile];
+        const currentWordSquares = [...previousWordSquares, currentSquare];
+        const currentWordLetters = [...previousWordLetters, letter];
+        const remainingRack = rack.filter((t) => t !== tile);
+
+        // If the word exists, at least a tile form rack was used and the next square is empty, we have a valid word
+        if (
+          indexPosition?.word &&
+          tileFromRackUsed &&
+          !currentSquare.next[d]?.tile
+        ) {
+          // The word needs to use a letter from the board or be connected to another word or overlap starting square in the first move
+          if (wordIsAnchoredToBoard) {
+            // A valid word was found
+            result.push(
+              this.buildMove(
+                indexPosition.word,
+                currentWordTiles,
+                currentWordSquares,
+                currentConnectedWords
+              )
+            );
+          }
+        }
+
+        result.push(
+          ...this.findWordsInDirection(
+            game,
+            isFirstMove,
+            currentSquare.next[d],
+            d,
+            indexPosition,
+            currentWordTiles,
+            currentWordSquares,
+            currentWordLetters,
+            remainingRack,
+            tileFromRackUsed,
+            wordIsAnchoredToBoard,
+            currentConnectedWords
+          )
+        );
+      }
+    }
 
     return result;
   }
@@ -217,6 +238,7 @@ export class Player {
   searchConnectedWord(
     lexicon: Lexicon,
     mainWordTile: Tile,
+    mainWordLetter: string,
     mainWordSquare: Square,
     mainWordDirection: Direction
   ): { wordFound: boolean; connectedWord?: MoveWord | undefined } {
@@ -252,7 +274,8 @@ export class Player {
 
     let lexiconIndex: WordIndex | undefined = lexicon.index;
     connectedWordTiles.forEach((tile) => {
-      lexiconIndex = lexiconIndex?.[tile.letter];
+      const letter = tile.isBlank ? mainWordLetter : tile.letter;
+      lexiconIndex = lexiconIndex?.[letter];
     });
 
     return {

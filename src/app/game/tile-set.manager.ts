@@ -12,7 +12,7 @@ export class TileSetManager {
       range(letter.count).map(() => ({
         letter: letter.letter,
         value: letter.value,
-        isBlank: letter.letter === '',
+        isBlank: letter.letter === '?',
       }))
     );
 

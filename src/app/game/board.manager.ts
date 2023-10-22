@@ -36,7 +36,6 @@ export class BoardManager {
     return {
       grid,
       squares: grid.flat(),
-      words: [],
       maxIndex: {
         [Direction.Horizontal]: rules.numberOfCols - 1,
         [Direction.Vertical]: rules.numberOfRows - 1,
@@ -46,10 +45,12 @@ export class BoardManager {
 
   placeMove(game: Game, move: Move) {
     for (let i = 0; i < move.moveWord.tiles.length; i++) {
-      move.moveWord.squares[i].tile = move.moveWord.tiles[i];
+      const tile = move.moveWord.tiles[i];
+      if (tile.isBlank) {
+        tile.letter = move.moveWord.word.text[i];
+      }
+      move.moveWord.squares[i].tile = tile;
     }
-
-    game.board.words.push(move.moveWord.word);
   }
 
   private linkSquaresNeighbor(grid: Square[][]) {

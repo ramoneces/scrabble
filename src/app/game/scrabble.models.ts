@@ -22,7 +22,6 @@ export interface Lexicon {
 export interface Board {
   squares: Square[];
   grid: Square[][];
-  words: LexiconWord[];
   maxIndex: { [direction: number]: number };
 }
 

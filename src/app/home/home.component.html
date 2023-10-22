@@ -17,13 +17,12 @@
               {{ multiplier.value
               }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
             </span>
-
             <div
               *ngIf="square.tile as tile"
               class="tile"
               [class.blank]="tile.isBlank"
             >
-              <span class="letter">{{ tile.isBlank ? "?" : tile.letter }}</span
+              <span class="letter">{{ tile.letter }}</span
               ><span class="value">{{ tile.value }}</span>
             </div>
           </div>
