@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class RandomNumberGenerator {
-  private seed: number = 3;
+  seed: number = 1;
 
   next(): number {
     var x = Math.sin(this.seed++) * 10000;

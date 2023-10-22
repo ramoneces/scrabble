@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, forkJoin, map, tap } from 'rxjs';
-import { Game, ScrabbleRules } from './scrabble.models';
+import { Game, Move, ScrabbleRules } from './scrabble.models';
 import { BoardManager } from './board.manager';
 import { TileSetManager } from './tile-set.manager';
 import { LexiconManager } from './lexicon.manager';
@@ -25,6 +25,7 @@ export class GameManager {
           lexicon: this.lexiconManager.buildLexicon(lexiconData),
           board: this.boardManager.buildBoard(rules),
           tileSet: this.tileSetManager.buildTileSet(rules),
+          moves: [],
         };
       }),
       tap(console.log)
@@ -37,10 +38,15 @@ export class GameManager {
     });
     game.players.forEach((player) => {
       const move = player.getMove(game);
-      if (move) {
+
+      if (move && this.moveIsValid(game, move)) {
         this.boardManager.placeMove(game, move);
       }
     });
+  }
+
+  private moveIsValid(game: Game, move: Move): boolean {
+    return true; // TODO
   }
 
   private getRules(): Observable<ScrabbleRules> {

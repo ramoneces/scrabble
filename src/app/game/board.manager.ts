@@ -21,6 +21,9 @@ export class BoardManager {
         grid[rowIndex][colIndex] = {
           rowIndex,
           colIndex,
+          isStartingSquare:
+            rowIndex === rules.startingSquare.rowIndex &&
+            colIndex === rules.startingSquare.colIndex,
           multiplier: this.getMultiplier(
             rules.squareMupltipliers[rowIndex]?.[colIndex]
           ),

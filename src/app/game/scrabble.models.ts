@@ -6,6 +6,7 @@ export interface Game {
   tileSet: TileSet;
   lexicon: Lexicon;
   rules: ScrabbleRules;
+  moves: Move[];
 }
 
 export interface TileSet {
@@ -30,7 +31,7 @@ export type WordIndex = { [letter: string]: WordIndex | undefined } & {
 };
 
 export interface LexiconWord {
-  word: string;
+  text: string;
   definition?: string;
 }
 
@@ -43,6 +44,7 @@ export interface Tile {
 export interface Square {
   rowIndex: number;
   colIndex: number;
+  isStartingSquare: boolean;
   multiplier?: Multiplier;
   tile?: Tile;
   next: { [direction: number]: Square };
@@ -67,11 +69,12 @@ export interface ScrabbleRules {
   startingSquare: { rowIndex: number; colIndex: number };
   numberOfRows: number;
   numberOfCols: number;
+  rackSize: number;
 }
 
 export interface Move {
   moveWord: MoveWord;
-  additionalWords: MoveWord[];
+  connectedWords: MoveWord[];
 }
 
 export interface MoveWord {

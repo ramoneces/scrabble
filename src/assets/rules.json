@@ -49,5 +49,6 @@
   
     "startingSquare": { "rowIndex": 7, "colIndex": 7 },
     "numberOfRows": 15,
-    "numberOfCols": 15
+    "numberOfCols": 15,
+    "rackSize": 7
   }

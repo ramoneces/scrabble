@@ -1,5 +1,4 @@
 import {
-  Board,
   Tile,
   LexiconWord,
   WordIndex,
@@ -7,18 +6,19 @@ import {
   Square,
   Move,
   Direction,
-  ScrabbleRules,
   MoveWord,
   MultiplierKind,
+  Lexicon,
 } from './scrabble.models';
-import { mapMany, maxMap as maxBy, sumMap } from '../utils/array.utils';
+import { groupBy, mapMany } from '../utils/array.utils';
+import { RandomNumberGenerator } from '../utils/random-number.generator';
 
 export class Player {
   name: string;
   score: number;
   rack: Tile[];
 
-  constructor(name: string) {
+  constructor(name: string, private rnd: RandomNumberGenerator) {
     this.name = name;
     this.score = 0;
     this.rack = [];
@@ -29,188 +29,63 @@ export class Player {
   }
 
   getMove(game: Game): Move | undefined {
-    const bestWord = this.findFirstMove(game);
-    console.log(this.name, { bestWord });
-    return bestWord;
-  }
-
-  // private findBestMove(game: Game): Move | undefined {
-  //   const words = this.findWords(game.lexicon.index);
-  //   console.log(this.name, {
-  //     words,
-  //     wordtexts: words.map((w) => w.moveWord.word),
-  //   });
-
-  //   if (words.length === 0) {
-  //     return undefined;
-  //   }
-
-  //   if (words.length === 1) {
-  //     return words[0];
-  //   }
-
-  //   return maxMap(words, (w) => sumMap(w.tiles, (t) => t.value));
-  // }
-
-  // private findWords(
-  //   wordIndex: WordIndex,
-  //   previousWord: Tile[] = [],
-  //   rack: Tile[] = this.rack
-  // ): Move[] {
-  //   return mapMany(rack, (tile) => {
-  //     const position = wordIndex[tile.letter];
-
-  //     if (!position) {
-  //       return [];
-  //     }
-
-  //     const result: Move[] = [];
-
-  //     const currentWord = [...previousWord, tile];
-  //     const remainingRack = rack.filter((t) => t !== tile);
-
-  //     if (position?.word) {
-  //       result.push({
-  //         row: 7,
-  //         col: 7,
-  //         direction: Direction.Horizontal,
-  //         moveWord: { word: position.word, tiles: currentWord },
-  //       });
-  //     }
-
-  //     return result.concat(
-  //       this.findWords(position, currentWord, remainingRack)
-  //     );
-  //   });
-  // }
-
-  private findFirstMove(game: Game): Move | undefined {
-    const moves: Move[] = [];
-    [Direction.Horizontal, Direction.Vertical].forEach((direction) => {
-      const startingSquares = game.board.squares.filter((square) =>
-        this.squareCanStartFirstWord(game.rules, square, direction)
-      );
-      startingSquares.forEach((startingSquare) => {
-        moves.push(
-          ...this.findWordsInDirection(
+    const moves = mapMany(
+      [Direction.Horizontal, Direction.Vertical],
+      (direction) =>
+        mapMany(game.board.squares, (startingSquare) =>
+          this.findWordsInDirection(
+            game,
+            game.moves.length === 0,
             startingSquare,
             direction,
             game.lexicon.index
           )
-        );
-      });
-    });
-
-    return maxBy(moves, (m) => m.moveWord.score);
-  }
-
-  private findWordsInDirection(
-    currentSquare: Square | undefined,
-    d: Direction,
-    wordIndex: WordIndex,
-    previousWordTiles: Tile[] = [],
-    previousWordSquares: Square[] = [],
-    rack: Tile[] = this.rack
-  ): Move[] {
-    // If we are out of bounds, no more moves can be done
-    if (!currentSquare) return [];
-
-    const result: Move[] = [];
-
-    const tiles = currentSquare.tile ? [currentSquare.tile] : rack;
-
-    tiles.forEach((tile) => {
-      const indexPosition = wordIndex[tile.letter];
-
-      if (!indexPosition) {
-        return;
-      }
-
-      const currentWordTiles = [...previousWordTiles, tile];
-      const currentWordSquares = [...previousWordSquares, currentSquare];
-      const remainingRack = rack.filter((t) => t !== tile);
-
-      if (indexPosition?.word) {
-        result.push({
-          moveWord: this.buildMoveWord(
-            indexPosition.word,
-            currentWordTiles,
-            currentWordSquares
-          ),
-          additionalWords: [],
-        });
-      }
-
-      result.push(
-        ...this.findWordsInDirection(
-          currentSquare.next[d],
-          d,
-          indexPosition,
-          currentWordTiles,
-          currentWordSquares,
-          remainingRack
         )
-      );
-    });
-
-    return result;
+    );
+    return this.selectBestMove(moves);
   }
 
-  private buildMoveWord(
-    word: LexiconWord,
-    tiles: Tile[],
-    squares: Square[]
-  ): MoveWord {
-    return {
-      word,
-      tiles,
-      squares,
-      score: this.computeScore(squares, tiles),
-    };
+  //#region 1st move
+
+  private selectBestMove(moves: Move[]): Move | undefined {
+    const movesByScore = groupBy(moves, (m) => m.moveWord.score);
+    const scores = Object.keys(movesByScore).map((score) => +score);
+
+    if (scores.length === 0) {
+      console.log('no moves');
+      return undefined;
+    }
+
+    const maxScore = Math.max(...scores);
+    const bestMoves = movesByScore[maxScore];
+    console.log(
+      this.name,
+      Object.values(movesByScore).map((m) =>
+        m.map((m) => ({
+          score: m.moveWord.score,
+          word: m.moveWord.word.text,
+        }))
+      ),
+      ...bestMoves.map((m) => ({
+        score: m.moveWord.score,
+        word: m.moveWord.word.text,
+      }))
+    );
+
+    // Return a random move for now
+    return bestMoves[Math.floor(this.rnd.next() * bestMoves.length)];
   }
 
-  private computeScore(squares: Square[], tiles: Tile[]): number {
-    let wordScore = 0;
-    let wordMultiplier = 1;
-    tiles.forEach((tile, index) => {
-      const letterMultiplier =
-        squares[index].multiplier?.kind === MultiplierKind.Letter
-          ? squares[index].multiplier!.value
-          : 1;
-      wordScore += tile.value * letterMultiplier;
-
-      wordMultiplier *=
-        squares[index].multiplier?.kind === MultiplierKind.Word
-          ? squares[index].multiplier!.value
-          : 1;
-    });
-
-    return wordScore * wordMultiplier;
-  }
-
-  private squareCanStartFirstWord(
-    rules: ScrabbleRules,
-    square: Square,
-    d: Direction
-  ): boolean {
+  private squareCanStartFirstWord(square: Square, d: Direction): boolean {
     // The square can start the first word if a word can be formed that overlaps the starting square
     return !![square, ...square.nexts[d].slice(0, this.rack.length - 1)].find(
-      (s) =>
-        s.colIndex === rules.startingSquare.colIndex &&
-        s.rowIndex === rules.startingSquare.rowIndex
+      (s) => s.isStartingSquare
     );
   }
 
-  private findMoves(game: Game): Move[] {
-    const horizontalStartingSquares = game.board.squares.filter((square) =>
-      this.squareCanStartWord(square, Direction.Horizontal)
-    );
-    const verticalStartingSquares = game.board.squares.filter((square) =>
-      this.squareCanStartWord(square, Direction.Vertical)
-    );
+  //#endregion
 
-    return [];
-  }
+  //#region 2nd and subsequent moves
 
   private squareCanStartWord(square: Square, d: Direction): boolean {
     // If the square has a previous square with a tile,
@@ -225,5 +100,208 @@ export class Player {
     // If the square doesn't have a tile,
     // it can only start a word if it has at least a square with a tile in the next rack.length squares.
     return square.nexts[d].slice(0, this.rack.length).some((s) => !!s.tile);
+  }
+
+  //#endregion
+
+  private findWordsInDirection(
+    game: Game,
+    isFirstMove: boolean,
+    currentSquare: Square | undefined,
+    d: Direction,
+    wordIndex: WordIndex,
+    previousWordTiles: Tile[] = [],
+    previousWordSquares: Square[] = [],
+    rack: Tile[] = this.rack,
+    tileFromRackUsed: boolean = false,
+    wordIsAnchoredToBoard: boolean = false,
+    previousConnectedWords: MoveWord[] = []
+  ): Move[] {
+    if (previousWordTiles.length === 0) {
+      // If we are at the beginning of the word, we need to check if the square can start a word
+      if (
+        (isFirstMove && !this.squareCanStartFirstWord(currentSquare!, d)) ||
+        (!isFirstMove && !this.squareCanStartWord(currentSquare!, d))
+      ) {
+        return [];
+      }
+    }
+
+    // If we are out of bounds, no more moves can be done
+    if (!currentSquare) return [];
+
+    const result: Move[] = [];
+
+    let tiles: Tile[];
+    if (currentSquare.tile) {
+      wordIsAnchoredToBoard = true; // A tile from the board is used in the word
+      tiles = [currentSquare.tile];
+    } else {
+      if (isFirstMove && currentSquare.isStartingSquare) {
+        wordIsAnchoredToBoard = true; // A tile is placed in the starting point
+      }
+      tileFromRackUsed = true;
+      tiles = rack;
+    }
+
+    tiles.forEach((tile) => {
+      const indexPosition = wordIndex[tile.letter];
+
+      if (!indexPosition) {
+        return;
+      }
+
+      const connectedWordResult: {
+        wordFound: boolean;
+        connectedWord?: MoveWord;
+      } = this.searchConnectedWord(game.lexicon, tile, currentSquare, d);
+
+      const currentConnectedWords = [...previousConnectedWords];
+      if (connectedWordResult.wordFound) {
+        if (!connectedWordResult.connectedWord) {
+          // An erroneus connected word was found
+          return;
+        }
+
+        currentConnectedWords.push(connectedWordResult.connectedWord);
+        wordIsAnchoredToBoard = true; // A connected word was found
+      }
+
+      const currentWordTiles = [...previousWordTiles, tile];
+      const currentWordSquares = [...previousWordSquares, currentSquare];
+      const remainingRack = rack.filter((t) => t !== tile);
+
+      // If the word exists, at least a tile form rack was used and the next square is empty, we have a valid word
+      if (
+        indexPosition?.word &&
+        tileFromRackUsed &&
+        !currentSquare.next[d]?.tile
+      ) {
+        // The word needs to use a letter from the board or be connected to another word or overlap starting square in the first move
+        if (wordIsAnchoredToBoard) {
+          // A valid word was found
+          result.push({
+            moveWord: this.buildMoveWord(
+              indexPosition.word,
+              currentWordTiles,
+              currentWordSquares
+            ),
+            connectedWords: currentConnectedWords,
+          });
+        }
+      }
+
+      result.push(
+        ...this.findWordsInDirection(
+          game,
+          isFirstMove,
+          currentSquare.next[d],
+          d,
+          indexPosition,
+          currentWordTiles,
+          currentWordSquares,
+          remainingRack,
+          tileFromRackUsed,
+          wordIsAnchoredToBoard,
+          currentConnectedWords
+        )
+      );
+    });
+
+    return result;
+  }
+
+  searchConnectedWord(
+    lexicon: Lexicon,
+    mainWordTile: Tile,
+    mainWordSquare: Square,
+    mainWordDirection: Direction
+  ): { wordFound: boolean; connectedWord?: MoveWord | undefined } {
+    // Search words in the other direction
+    const d =
+      mainWordDirection === Direction.Horizontal
+        ? Direction.Vertical
+        : Direction.Horizontal;
+
+    let connectedWordTiles: Tile[] = [mainWordTile];
+    let connectedWordSquares: Square[] = [mainWordSquare];
+
+    // Look for connected letters before
+    let currentSquare = mainWordSquare.prev[d];
+    while (currentSquare?.tile) {
+      connectedWordTiles = [currentSquare.tile, ...connectedWordTiles];
+      connectedWordSquares = [currentSquare, ...connectedWordSquares];
+      currentSquare = currentSquare.prev[d];
+    }
+
+    // Look for connected letters after
+    currentSquare = mainWordSquare.next[d];
+    while (currentSquare?.tile) {
+      connectedWordTiles = [...connectedWordTiles, currentSquare.tile];
+      connectedWordSquares = [...connectedWordSquares, currentSquare];
+      currentSquare = currentSquare.next[d];
+    }
+
+    const wordFound = connectedWordTiles.length > 1;
+    if (!wordFound) {
+      return { wordFound: false };
+    }
+
+    let lexiconIndex: WordIndex | undefined = lexicon.index;
+    connectedWordTiles.forEach((tile) => {
+      lexiconIndex = lexiconIndex?.[tile.letter];
+    });
+
+    return {
+      wordFound,
+      connectedWord: lexiconIndex?.word
+        ? this.buildMoveWord(
+            lexiconIndex.word,
+            connectedWordTiles,
+            connectedWordSquares
+          )
+        : undefined,
+    };
+  }
+
+  private buildMoveWord(
+    word: LexiconWord,
+    tiles: Tile[],
+    squares: Square[]
+  ): MoveWord {
+    return {
+      word,
+      tiles,
+      squares,
+      score: this.computeWordScore(squares, tiles),
+    };
+  }
+
+  private computeWordScore(wordSquares: Square[], wordTiles: Tile[]): number {
+    let wordScore = 0;
+    let wordMultiplier = 1;
+    wordTiles.forEach((tile, index) => {
+      const square = wordSquares[index];
+
+      let letterValue = tile.value;
+
+      if (!square.tile) {
+        // Only empty squares can apply multipliers
+        const letterMultiplier =
+          square.multiplier?.kind === MultiplierKind.Letter
+            ? square.multiplier!.value
+            : 1;
+        letterValue *= letterMultiplier;
+
+        wordMultiplier *=
+          square.multiplier?.kind === MultiplierKind.Word
+            ? square.multiplier!.value
+            : 1;
+      }
+
+      wordScore += letterValue;
+    });
+
+    return wordScore * wordMultiplier;
   }
 }

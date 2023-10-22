@@ -14,7 +14,7 @@ export function range(count: number): number[] {
     .map((_, i) => i);
 }
 
-export function maxMap<TItem>(
+export function maxBy<TItem>(
   items: TItem[],
   selector: (item: TItem) => number
 ): TItem | undefined {
@@ -27,9 +27,31 @@ export function maxMap<TItem>(
   }, items[0]);
 }
 
-export function sumMap<TItem>(
+export function sumBy<TItem>(
   items: TItem[],
   selector: (item: TItem) => number
 ): number {
   return items.reduce((sum, item) => sum + selector(item), 0);
+}
+
+export function orderBy<TItem>(
+  items: TItem[],
+  selector: (item: TItem) => number
+): TItem[] {
+  return items.sort((a, b) => selector(a) - selector(b));
+}
+
+export function groupBy<TItem, TKey extends string | number>(
+  items: TItem[],
+  keySelector: (item: TItem) => TKey
+): { [key in TKey]: TItem[] } {
+  const groups: { [key in TKey]: TItem[] } = {} as any;
+  items.forEach((item) => {
+    const key = keySelector(item);
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(item);
+  });
+  return groups;
 }

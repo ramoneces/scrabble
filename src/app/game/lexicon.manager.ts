@@ -10,14 +10,14 @@ export class LexiconManager {
     return { words, index };
   }
 
-  private buildWords(data: string) {
+  private buildWords(data: string): LexiconWord[] {
     return data
       .split('\n')
       .filter((line) => !line.startsWith('#'))
       .map((line) => {
-        const [word, definition] = line.split('\t');
+        const [text, definition] = line.split('\t');
         return {
-          word,
+          text,
           definition,
         };
       });
@@ -25,11 +25,10 @@ export class LexiconManager {
 
   private buildIndex(words: LexiconWord[]): WordIndex {
     const index: WordIndex = {};
-    console.time('index');
     words.forEach((word) => {
       let current = index;
-      for (let i = 0; i < word.word.length; i++) {
-        const letter = word.word[i];
+      for (let i = 0; i < word.text.length; i++) {
+        const letter = word.text[i];
         if (!current[letter]) {
           current[letter] = {};
         }
@@ -37,7 +36,6 @@ export class LexiconManager {
       }
       current.word = word;
     });
-    console.timeEnd('index');
     return index;
   }
 }
