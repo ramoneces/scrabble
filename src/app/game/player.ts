@@ -63,12 +63,12 @@ export class Player {
       Object.values(movesByScore).map((m) =>
         m.map((m) => ({
           score: m.score,
-          word: m.moveWord.word.text,
+          word: m.moveWord.word.keys,
         }))
       ),
       ...bestMoves.map((m) => ({
         score: m.score,
-        word: m.moveWord.word.text,
+        word: m.moveWord.word.keys,
       }))
     );
 
@@ -153,7 +153,7 @@ export class Player {
       if (usingTileFromRack && tile.isBlank) {
         letters = Object.keys(wordIndex);
       } else {
-        letters = [tile.letter];
+        letters = [tile.key];
       }
 
       for (const letter of letters) {
@@ -274,7 +274,7 @@ export class Player {
 
     let lexiconIndex: WordIndex | undefined = lexicon.index;
     connectedWordTiles.forEach((tile) => {
-      const letter = tile.isBlank ? mainWordLetter : tile.letter;
+      const letter = tile.isBlank ? mainWordLetter : tile.key;
       lexiconIndex = lexiconIndex?.[letter];
     });
 

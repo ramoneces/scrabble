@@ -30,13 +30,15 @@ export type WordIndex = { [letter: string]: WordIndex | undefined } & {
 };
 
 export interface LexiconWord {
+  keys: string;
   text: string;
   definition?: string;
 }
 
 export interface Tile {
   isBlank: boolean;
-  letter: string;
+  key: string;
+  text: string;
   value: number;
 }
 
@@ -63,7 +65,12 @@ export enum MultiplierKind {
 }
 
 export interface ScrabbleRules {
-  letters: { letter: string; count: number; value: number }[];
+  letters: {
+    key: string;
+    count: number;
+    value: number;
+    text?: string;
+  }[];
   squareMupltipliers: (string | null)[][];
   startingSquare: { rowIndex: number; colIndex: number };
   numberOfRows: number;

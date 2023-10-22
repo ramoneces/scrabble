@@ -1,11 +1,23 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, forkJoin, map, tap } from 'rxjs';
+import {
+  Observable,
+  bufferCount,
+  distinctUntilChanged,
+  forkJoin,
+  interval,
+  map,
+  take,
+  takeWhile,
+  tap,
+} from 'rxjs';
 import { Game, Move, ScrabbleRules } from './scrabble.models';
 import { BoardManager } from './board.manager';
 import { TileSetManager } from './tile-set.manager';
 import { LexiconManager } from './lexicon.manager';
 import { Player } from './player';
+import { takeUntilConsecutiveDuplicates } from '../utils/rxjs.utils';
+import { environment } from 'src/environments/environment.development';
 
 @Injectable({ providedIn: 'root' })
 export class GameManager {
@@ -22,7 +34,7 @@ export class GameManager {
         return {
           rules,
           players,
-          lexicon: this.lexiconManager.buildLexicon(lexiconData),
+          lexicon: this.lexiconManager.buildLexicon(lexiconData, rules),
           board: this.boardManager.buildBoard(rules),
           tileSet: this.tileSetManager.buildTileSet(rules),
           moves: [],
@@ -37,28 +49,33 @@ export class GameManager {
       player.takeTiles(this.tileSetManager.drawRandomTiles(game.tileSet, 7));
     });
 
-    let movesPlaced: boolean;
-    do {
-      movesPlaced = false;
-      game.players.forEach((player) => {
-        const move = player.getMove(game);
-        console.log(move);
+    interval(1000)
+      .pipe(
+        takeWhile(() => game.players.some((player) => player.rack.length > 0)), // While some players can still play
+        map((index) => game.players[index % game.players.length]), // Cycle through players
+        map((player) => player.getMove(game)), // Get move from player
+        tap((move) => {
+          if (move) {
+            this.applyMove(game, move.player, move);
+            move.player.takeTiles(
+              this.tileSetManager.drawRandomTiles(
+                game.tileSet,
+                game.rules.rackSize - move.player.rack.length
+              )
+            );
+            game.moves.push(move);
+          }
 
-        if (move) {
-          this.applyMove(game, player, move);
-          player.takeTiles(
-            this.tileSetManager.drawRandomTiles(
-              game.tileSet,
-              game.rules.rackSize - player.rack.length
-            )
-          );
-          game.moves.push(move);
-          movesPlaced = true;
-        }
+          return move;
+        }),
+        takeUntilConsecutiveDuplicates(
+          game.players.length,
+          (move) => move ?? 'Player passed'
+        )
+      )
+      .subscribe({
+        complete: () => console.log('Game over'),
       });
-    } while (movesPlaced);
-
-    console.log('Game over');
   }
 
   private applyMove(game: Game, player: Player, move: Move) {
@@ -68,10 +85,14 @@ export class GameManager {
   }
 
   private getRules(): Observable<ScrabbleRules> {
-    return this.http.get<ScrabbleRules>('assets/rules.json');
+    return this.http.get<ScrabbleRules>(
+      `assets/rules.${environment.language}.json`
+    );
   }
 
   private getLexicon(): Observable<string> {
-    return this.http.get('assets/lexicon.en.txt', { responseType: 'text' });
+    return this.http.get(`assets/lexicon.${environment.language}.txt`, {
+      responseType: 'text',
+    });
   }
 }

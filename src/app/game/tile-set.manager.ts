@@ -8,11 +8,12 @@ export class TileSetManager {
   constructor(private rnd: RandomNumberGenerator) {}
 
   buildTileSet(rules: ScrabbleRules): TileSet {
-    const all = mapMany(rules.letters, (letter) =>
+    const all: Tile[] = mapMany(rules.letters, (letter) =>
       range(letter.count).map(() => ({
-        letter: letter.letter,
+        key: letter.key,
+        text: letter.text ?? letter.key,
         value: letter.value,
-        isBlank: letter.letter === '?',
+        isBlank: letter.key === '?',
       }))
     );
 

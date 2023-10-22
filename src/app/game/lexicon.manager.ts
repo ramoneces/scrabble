@@ -1,23 +1,38 @@
 import { Injectable } from '@angular/core';
-import { LexiconWord, Lexicon, WordIndex } from './scrabble.models';
+import {
+  LexiconWord,
+  Lexicon,
+  WordIndex,
+  ScrabbleRules,
+} from './scrabble.models';
+import { groupBy, groupMapBy } from '../utils/array.utils';
 
 @Injectable({ providedIn: 'root' })
 export class LexiconManager {
-  buildLexicon(lexiconData: string): Lexicon {
-    const words = this.buildWords(lexiconData);
+  buildLexicon(lexiconData: string, rules: ScrabbleRules): Lexicon {
+    const words = this.buildWords(lexiconData, rules);
     const index = this.buildIndex(words);
 
     return { words, index };
   }
 
-  private buildWords(data: string): LexiconWord[] {
+  private buildWords(data: string, rules: ScrabbleRules): LexiconWord[] {
+    const letterReplaceMap = groupMapBy(
+      rules.letters.filter((letter) => !!letter.text),
+      (letter) => letter.key,
+      (letter) => letter.text
+    );
     return data
-      .split('\n')
+      .split(/\r?\n/)
       .filter((line) => !line.startsWith('#'))
       .map((line) => {
-        const [text, definition] = line.split('\t');
+        const [keys, definition] = line.split('\t');
         return {
-          text,
+          keys,
+          text: keys
+            .split('')
+            .map((letter) => letterReplaceMap[letter]?.[0] || letter)
+            .join(''),
           definition,
         };
       });
@@ -27,8 +42,8 @@ export class LexiconManager {
     const index: WordIndex = {};
     words.forEach((word) => {
       let current = index;
-      for (let i = 0; i < word.text.length; i++) {
-        const letter = word.text[i];
+      for (let i = 0; i < word.keys.length; i++) {
+        const letter = word.keys[i];
         if (!current[letter]) {
           current[letter] = {};
         }

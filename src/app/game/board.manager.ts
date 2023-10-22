@@ -47,7 +47,7 @@ export class BoardManager {
     for (let i = 0; i < move.moveWord.tiles.length; i++) {
       const tile = move.moveWord.tiles[i];
       if (tile.isBlank) {
-        tile.letter = move.moveWord.word.text[i];
+        tile.key = move.moveWord.word.keys[i];
       }
       move.moveWord.squares[i].tile = tile;
     }
@@ -91,7 +91,16 @@ export class BoardManager {
     const matches = multiplier.match(/(\d+)(\w+)/)!;
     const value = parseInt(matches[1]);
     const kind =
-      matches[2] === 'L' ? MultiplierKind.Letter : MultiplierKind.Word;
+      matches[2] === 'L'
+        ? MultiplierKind.Letter
+        : matches[2] === 'W'
+        ? MultiplierKind.Word
+        : undefined;
+
+    if (kind === undefined) {
+      throw new Error(`Invalid multiplier kind: ${matches[2]}`);
+    }
+
     return { value, kind };
   }
 }
