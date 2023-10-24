@@ -1,25 +1,26 @@
-import {
-  Tile,
-  LexiconWord,
-  WordIndex,
-  Game,
-  Square,
-  Move,
-  Direction,
-  MoveWord,
-  MultiplierKind,
-  Lexicon,
-} from './scrabble.models';
 import { groupBy, mapMany, sumBy } from '../utils/array.utils';
 import { RandomNumberGenerator } from '../utils/random-number.generator';
+import {
+  Direction,
+  Game,
+  LexiconWord,
+  Move,
+  MoveWord,
+  MultiplierKind,
+  Square,
+  Tile,
+  WordIndex,
+} from './scrabble.models';
 
 export class Player {
-  name: string;
   score: number;
   rack: Tile[];
 
-  constructor(name: string, private rnd: RandomNumberGenerator) {
-    this.name = name;
+  constructor(
+    public name: string,
+    private rnd: RandomNumberGenerator,
+    private game: Game
+  ) {
     this.score = 0;
     this.rack = [];
   }
@@ -28,17 +29,16 @@ export class Player {
     this.rack.push(...tiles);
   }
 
-  getMove(game: Game): Move | undefined {
+  getMove(): Move | undefined {
     const moves = mapMany(
       [Direction.Horizontal, Direction.Vertical],
       (direction) =>
-        mapMany(game.board.squares, (startingSquare) =>
+        mapMany(this.game.board.squares, (startingSquare) =>
           this.findWordsInDirection(
-            game,
-            game.moves.length === 0,
+            this.game.moves.length === 0,
             startingSquare,
             direction,
-            game.lexicon.index
+            this.game.lexicon.index
           )
         )
     );
@@ -105,7 +105,6 @@ export class Player {
   //#endregion
 
   private findWordsInDirection(
-    game: Game,
     isFirstMove: boolean,
     currentSquare: Square | undefined,
     d: Direction,
@@ -169,13 +168,7 @@ export class Player {
           const connectedWordResult: {
             wordFound: boolean;
             connectedWord?: MoveWord;
-          } = this.searchConnectedWord(
-            game.lexicon,
-            tile,
-            letter,
-            currentSquare,
-            d
-          );
+          } = this.searchConnectedWord(tile, letter, currentSquare, d);
 
           if (connectedWordResult.wordFound) {
             if (!connectedWordResult.connectedWord) {
@@ -215,7 +208,6 @@ export class Player {
 
         result.push(
           ...this.findWordsInDirection(
-            game,
             isFirstMove,
             currentSquare.next[d],
             d,
@@ -236,7 +228,6 @@ export class Player {
   }
 
   searchConnectedWord(
-    lexicon: Lexicon,
     mainWordTile: Tile,
     mainWordLetter: string,
     mainWordSquare: Square,
@@ -272,7 +263,7 @@ export class Player {
       return { wordFound: false };
     }
 
-    let lexiconIndex: WordIndex | undefined = lexicon.index;
+    let lexiconIndex: WordIndex | undefined = this.game.lexicon.index;
     connectedWordTiles.forEach((tile) => {
       const letter = tile.isBlank ? mainWordLetter : tile.key;
       lexiconIndex = lexiconIndex?.[letter];
@@ -321,13 +312,14 @@ export class Player {
   private computeWordScore(wordSquares: Square[], wordTiles: Tile[]): number {
     let wordScore = 0;
     let wordMultiplier = 1;
+    let tilesPlayed = 0;
     wordTiles.forEach((tile, index) => {
       const square = wordSquares[index];
 
       let letterValue = tile.value;
 
       if (!square.tile) {
-        // Only empty squares can apply multipliers
+        // Only played tiles can apply multipliers
         const letterMultiplier =
           square.multiplier?.kind === MultiplierKind.Letter
             ? square.multiplier!.value
@@ -338,11 +330,19 @@ export class Player {
           square.multiplier?.kind === MultiplierKind.Word
             ? square.multiplier!.value
             : 1;
+
+        tilesPlayed++;
       }
 
       wordScore += letterValue;
     });
 
-    return wordScore * wordMultiplier;
+    wordScore *= wordMultiplier;
+
+    if (tilesPlayed === this.game.rules.rackSize) {
+      wordScore += 50; // Bingo!
+    }
+
+    return wordScore;
   }
 }

@@ -1,23 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {
-  Observable,
-  bufferCount,
-  distinctUntilChanged,
-  forkJoin,
-  interval,
-  map,
-  take,
-  takeWhile,
-  tap,
-} from 'rxjs';
-import { Game, Move, ScrabbleRules } from './scrabble.models';
+import { Observable, forkJoin, interval, map, takeWhile, tap } from 'rxjs';
+import { environment } from 'src/environments/environment.development';
+import { takeUntilConsecutiveDuplicates } from '../utils/rxjs.utils';
 import { BoardManager } from './board.manager';
-import { TileSetManager } from './tile-set.manager';
 import { LexiconManager } from './lexicon.manager';
 import { Player } from './player';
-import { takeUntilConsecutiveDuplicates } from '../utils/rxjs.utils';
-import { environment } from 'src/environments/environment.development';
+import { Game, Move, ScrabbleRules } from './scrabble.models';
+import { TileSetManager } from './tile-set.manager';
 
 @Injectable({ providedIn: 'root' })
 export class GameManager {
@@ -44,19 +34,23 @@ export class GameManager {
     );
   }
 
-  begin(game: Game) {
+  addPlayers(game: Game, ...players: Player[]) {
+    game.players.push(...players);
+  }
+
+  begin(game: Game, thinkTime: number) {
     game.players.forEach((player) => {
       player.takeTiles(this.tileSetManager.drawRandomTiles(game.tileSet, 7));
     });
 
-    interval(1000)
+    interval(thinkTime)
       .pipe(
         takeWhile(() => game.players.some((player) => player.rack.length > 0)), // While some players can still play
         map((index) => game.players[index % game.players.length]), // Cycle through players
-        map((player) => player.getMove(game)), // Get move from player
+        map((player) => player.getMove()), // Get move from player
         tap((move) => {
           if (move) {
-            this.applyMove(game, move.player, move);
+            this.applyMove(game, move);
             move.player.takeTiles(
               this.tileSetManager.drawRandomTiles(
                 game.tileSet,
@@ -78,10 +72,12 @@ export class GameManager {
       });
   }
 
-  private applyMove(game: Game, player: Player, move: Move) {
-    this.boardManager.placeMove(game, move);
-    player.rack = player.rack.filter((t) => !move.moveWord.tiles.includes(t));
-    player.score += move.score;
+  private applyMove(game: Game, move: Move) {
+    this.boardManager.placeMove(move, game.lexicon);
+    move.player.rack = move.player.rack.filter(
+      (t) => !move.moveWord.tiles.includes(t)
+    );
+    move.player.score += move.score;
   }
 
   private getRules(): Observable<ScrabbleRules> {

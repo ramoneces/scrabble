@@ -1,0 +1,79 @@
+@use "@angular/material" as mat;
+@import "../../../styles/styles.scss";
+
+.wrapper {
+  padding: 1rem;
+
+  .move {
+    gap: 1rem;
+    align-items: center;
+    padding: 0.5rem;
+
+    &:nth-child(2n + 1) {
+      background-color: #8b8b8b80;
+    }
+
+    .player {
+      left: 100%;
+      font-size: x-small;
+    }
+
+    .score-column {
+      width: 1.5rem;
+      justify-content: center;
+    }
+
+    .score {
+      background-color: mat.get-color-from-palette($scrabble-primary);
+
+      color: white;
+      border-radius: 1rem;
+      padding: 0.2rem;
+      font-weight: lighter;
+      min-width: 0.6rem;
+      text-align: center;
+    }
+
+    .words-column {
+      gap: 0.25rem;
+
+      .word {
+        background-color: lemonchiffon;
+        color: black;
+        border-radius: 0.3rem;
+        gap: 0.3rem;
+        align-items: center;
+        padding: 0.1rem 0.1rem 0.1rem 0.3rem;
+
+        &.main {
+          .score {
+            font-size: x-small;
+            padding: 0.1rem;
+          }
+
+          .text {
+            letter-spacing: 0.25rem;
+            font-weight: 500;
+          }
+        }
+        &.sub {
+          font-size: small;
+
+          .score {
+            font-size: xx-small;
+            padding: 0.05rem;
+          }
+
+          .text {
+            letter-spacing: 0.15rem;
+          }
+        }
+      }
+
+      .subwords {
+        padding-left: 0.25rem;
+        gap: 0.5rem;
+      }
+    }
+  }
+}

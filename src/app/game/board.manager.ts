@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import {
   Board,
+  Direction,
+  Lexicon,
+  Move,
   Multiplier,
   MultiplierKind,
-  Game,
   ScrabbleRules,
   Square,
-  Move,
-  Direction,
 } from './scrabble.models';
 
 @Injectable({ providedIn: 'root' })
@@ -43,11 +43,13 @@ export class BoardManager {
     };
   }
 
-  placeMove(game: Game, move: Move) {
+  placeMove(move: Move, lexicon: Lexicon) {
     for (let i = 0; i < move.moveWord.tiles.length; i++) {
       const tile = move.moveWord.tiles[i];
       if (tile.isBlank) {
-        tile.key = move.moveWord.word.keys[i];
+        const key = move.moveWord.word.keys[i];
+        tile.key = key;
+        tile.text = lexicon.letterKeyToTextMap[key] ?? key;
       }
       move.moveWord.squares[i].tile = tile;
     }

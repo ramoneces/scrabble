@@ -7,5 +7,5 @@ import { Move } from 'src/app/game/scrabble.models';
   styleUrls: ['./move-display.component.scss'],
 })
 export class MoveDisplayComponent {
-  @Input() move!: Move;
+  @Input() moves: Move[] = [];
 }

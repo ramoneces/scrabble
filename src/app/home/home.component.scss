@@ -1,11 +1,7 @@
-:host {
-  display: contents;
-}
-
 .square {
   background-color: whitesmoke;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
   padding: 0.25rem;
   position: relative;
 
@@ -74,11 +70,14 @@
   }
 }
 
-mat-card-title {
-  padding-left: 1rem;
+mat-tab-group {
+  width: 100%;
 }
 
-mat-card-content {
-  display: flex;
-  align-items: flex-start;
+mat-card,
+mat-card-content,
+#wrapper,
+mat-tab-group {
+  height: 100%;
+  max-height: 100%;
 }

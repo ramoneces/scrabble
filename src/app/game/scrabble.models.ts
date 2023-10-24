@@ -17,6 +17,7 @@ export interface TileSet {
 export interface Lexicon {
   words: LexiconWord[];
   index: WordIndex;
+  letterKeyToTextMap: { [key: string]: string };
 }
 
 export interface Board {

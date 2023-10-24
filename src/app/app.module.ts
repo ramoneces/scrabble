@@ -10,9 +10,10 @@ import { MultiplierClassPipe } from './home/multiplier-class.pipe';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MoveDisplayComponent } from './home/move-display/move-display.component';
+import { PlayersDisplayComponent } from './home/players-display/players-display.component';
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, MultiplierClassPipe, MoveDisplayComponent],
+  declarations: [AppComponent, HomeComponent, MultiplierClassPipe, MoveDisplayComponent, PlayersDisplayComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

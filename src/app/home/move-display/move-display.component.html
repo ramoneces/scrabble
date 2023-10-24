@@ -1,13 +1,28 @@
-<mat-chip-listbox aria-label="Fish selection">
-  <mat-chip-option
-    color="accent"
-    selected
-    [matTooltip]="move.moveWord.word.definition ?? ''"
-    >{{ move.moveWord.word.text }}</mat-chip-option
-  >
-  <mat-chip-option
-    *ngFor="let subWord of move.connectedWords"
-    [matTooltip]="subWord.word.definition ?? ''"
-    >{{ subWord.word.text }}</mat-chip-option
-  >
-</mat-chip-listbox>
+<div class="wrapper d--f fd--c">
+  <div class="move d--f" *ngFor="let move of moves; index as moveIndex">
+    <div class="number-column d--f fd--c">
+      <span class="move-number">{{ moveIndex + 1 }}</span>
+      <span class="player">{{ move.player.name }}</span>
+    </div>
+    <div class="score-column d--f">
+      <span class="score">{{ move.score }}</span>
+    </div>
+    <div class="words-column d--f fd--c ai--fs">
+      <span
+        class="word main d--if"
+        [matTooltip]="move.moveWord.word.definition ?? ''"
+        ><span class="score">{{ move.moveWord.score }}</span
+        ><span class="text">{{ move.moveWord.word.text }}</span></span
+      >
+      <div class="subwords d--f">
+        <span
+          class="word sub d--if"
+          *ngFor="let subWord of move.connectedWords"
+          [matTooltip]="subWord.word.definition ?? ''"
+          ><span class="score">{{ subWord.score }}</span
+          ><span class="text">{{ subWord.word.text }}</span></span
+        >
+      </div>
+    </div>
+  </div>
+</div>

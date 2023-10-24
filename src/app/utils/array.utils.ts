@@ -56,18 +56,15 @@ export function groupBy<TItem, TKey extends string | number>(
   return groups;
 }
 
-export function groupMapBy<TItem, TKey extends string | number, TValue>(
+export function indexMapBy<TItem, TKey extends string | number, TValue>(
   items: TItem[],
   keySelector: (item: TItem) => TKey,
   valueSelector: (item: TItem) => TValue
-): { [key in TKey]: TValue[] } {
-  const groups: { [key in TKey]: TValue[] } = {} as any;
+): { [key in TKey]: TValue } {
+  const map: { [key in TKey]: TValue } = {} as any;
   items.forEach((item) => {
     const key = keySelector(item);
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-    groups[key].push(valueSelector(item));
+    map[key] = valueSelector(item);
   });
-  return groups;
+  return map;
 }

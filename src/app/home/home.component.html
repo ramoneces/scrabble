@@ -1,38 +1,65 @@
-<mat-card-title>
-  <h2>
-    Scrabble
-    <mat-form-field>
-      <mat-label>Seed</mat-label>
-      <input matInput type="number" [(ngModel)]="randomSeed" />
-    </mat-form-field>
-  </h2>
-</mat-card-title>
-<mat-card-content *ngIf="game$ | async as game">
-  <table class="board">
-    <tbody>
-      <tr *ngFor="let row of game.board.grid">
-        <td *ngFor="let square of row">
-          <div class="square" [ngClass]="square.multiplier | multiplierClass">
-            <span class="label" *ngIf="square.multiplier as multiplier">
-              {{ multiplier.value
-              }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
-            </span>
-            <div
-              *ngIf="square.tile as tile"
-              class="tile"
-              [class.blank]="tile.isBlank"
-            >
-              <span class="letter">{{ tile.text }}</span
-              ><span class="value">{{ tile.value }}</span>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <mat-list>
-    <mat-list-item *ngFor="let move of game.moves">
-      <app-move-display [move]="move"></app-move-display
-    ></mat-list-item>
-  </mat-list>
-</mat-card-content>
+<mat-card>
+  <mat-card-content *ngIf="game$ | async as game">
+    <div id="wrapper" class="d--f ai--fs">
+      <div id="left" class="d--f fd--c">
+        <div id="config" class="d--if">
+          <mat-form-field appearance="outline">
+            <mat-label>Seed</mat-label>
+            <input
+              matInput
+              type="number"
+              [(ngModel)]="randomSeed"
+              min="1"
+              max="10000"
+            />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Think time</mat-label>
+            <input
+              matInput
+              type="number"
+              [(ngModel)]="botThinkTimeMs"
+              min="0"
+              max="10000"
+            />
+            <span matSuffix>ms</span>
+          </mat-form-field>
+        </div>
+        <table class="board">
+          <tbody>
+            <tr *ngFor="let row of game.board.grid">
+              <td *ngFor="let square of row">
+                <div
+                  class="square"
+                  [ngClass]="square.multiplier | multiplierClass"
+                >
+                  <span class="label" *ngIf="square.multiplier as multiplier">
+                    {{ multiplier.value
+                    }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
+                  </span>
+                  <div
+                    *ngIf="square.tile as tile"
+                    class="tile"
+                    [class.blank]="tile.isBlank"
+                  >
+                    <span class="letter">{{ tile.text }}</span
+                    ><span class="value">{{ tile.value }}</span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <mat-tab-group animationDuration="0ms">
+        <mat-tab label="Moves"
+          ><app-move-display [moves]="game.moves"></app-move-display
+        ></mat-tab>
+        <mat-tab label="Players"
+          ><app-players-display></app-players-display
+        ></mat-tab>
+        <mat-tab label="Pile">Content 3</mat-tab>
+      </mat-tab-group>
+    </div>
+  </mat-card-content></mat-card
+>
