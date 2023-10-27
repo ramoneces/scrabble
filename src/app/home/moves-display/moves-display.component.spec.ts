@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MoveDisplayComponent } from './move-display.component';
+import { MovesDisplayComponent } from './moves-display.component';
 
 describe('MoveDisplayComponent', () => {
-  let component: MoveDisplayComponent;
-  let fixture: ComponentFixture<MoveDisplayComponent>;
+  let component: MovesDisplayComponent;
+  let fixture: ComponentFixture<MovesDisplayComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [MoveDisplayComponent]
+      declarations: [MovesDisplayComponent],
     });
-    fixture = TestBed.createComponent(MoveDisplayComponent);
+    fixture = TestBed.createComponent(MovesDisplayComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

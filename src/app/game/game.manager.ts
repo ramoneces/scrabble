@@ -6,7 +6,7 @@ import { takeUntilConsecutiveDuplicates } from '../utils/rxjs.utils';
 import { BoardManager } from './board.manager';
 import { LexiconManager } from './lexicon.manager';
 import { Player } from './player';
-import { Game, Move, ScrabbleRules } from './scrabble.models';
+import { Game, Move, ScrabbleRules, Tile } from './scrabble.models';
 import { TileSetManager } from './tile-set.manager';
 
 @Injectable({ providedIn: 'root' })
@@ -70,6 +70,38 @@ export class GameManager {
       .subscribe({
         complete: () => console.log('Game over'),
       });
+  }
+
+  toggleTileMoveSelection(game: Game, tile: Tile) {
+    const move = game.moves.find((move) => move.moveWord.tiles.includes(tile));
+
+    if (move) {
+      this.toggleMoveSelection(game, move);
+    }
+  }
+
+  toggleMoveSelection(game: Game, move: Move) {
+    if (move.isSelected) {
+      this.setMoveIsSelected(move, false);
+      return;
+    }
+
+    game.moves.forEach((move) => {
+      this.setMoveIsSelected(move, false);
+    });
+    this.setMoveIsSelected(move, true);
+  }
+
+  private setMoveIsSelected(move: Move, isSelected: boolean) {
+    move.moveWord.squares.forEach((square) => {
+      square.isSelected = isSelected;
+    });
+    move.connectedWords.forEach((connectedWord) => {
+      connectedWord.squares.forEach((square) => {
+        square.isSelected = isSelected;
+      });
+    });
+    move.isSelected = isSelected;
   }
 
   private applyMove(game: Game, move: Move) {

@@ -53,6 +53,7 @@ export interface Square {
   prev: { [direction: number]: Square };
   nexts: { [direction: number]: Square[] };
   prevs: { [direction: number]: Square[] };
+  isSelected?: boolean;
 }
 
 export interface Multiplier {
@@ -84,6 +85,7 @@ export interface Move {
   moveWord: MoveWord;
   connectedWords: MoveWord[];
   score: number;
+  isSelected?: boolean;
 }
 
 export interface MoveWord {

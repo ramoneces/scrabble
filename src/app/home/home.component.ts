@@ -38,7 +38,7 @@ export class HomeComponent implements OnDestroy {
   }
 
   constructor(
-    private gameManager: GameManager,
+    public gameManager: GameManager,
     private rnd: RandomNumberGenerator
   ) {
     this.refreshGame$.pipe(debounceTime(2000)).subscribe(() => {

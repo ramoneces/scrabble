@@ -1,5 +1,11 @@
 <div class="wrapper d--f fd--c">
-  <div class="move d--f" *ngFor="let move of moves; index as moveIndex">
+  <div
+    class="move d--f"
+    [class.selected]="move.isSelected"
+    *ngFor="let move of moves; index as moveIndex"
+    matRipple
+    (click)="moveClicked.emit(move)"
+  >
     <div class="number-column d--f fd--c">
       <span class="move-number">{{ moveIndex + 1 }}</span>
       <span class="player">{{ move.player.name }}</span>
