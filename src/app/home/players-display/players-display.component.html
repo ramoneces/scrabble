@@ -1,1 +1,10 @@
-<p>players-display works!</p>
+<div class="player" *ngFor="let player of players">
+  <span class="name">{{ player.name }}</span>
+  <div class="rack">
+    <app-tile-display
+      *ngFor="let tile of player.rack"
+      [tile]="tile"
+    ></app-tile-display>
+    <h4>{{ player.score }}</h4>
+  </div>
+</div>

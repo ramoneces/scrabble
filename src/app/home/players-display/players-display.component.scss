@@ -1,0 +1,16 @@
+.player {
+  padding: 0.5rem;
+
+  .rack {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: #232323;
+    border-bottom: 12px solid #161616;
+
+    app-tile-display {
+      height: 2.5rem;
+      width: 2.5rem;
+    }
+  }
+}

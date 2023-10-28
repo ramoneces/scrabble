@@ -11,6 +11,7 @@ import { MovesDisplayComponent } from './home/moves-display/moves-display.compon
 import { MultiplierClassPipe } from './home/multiplier-class.pipe';
 import { PlayersDisplayComponent } from './home/players-display/players-display.component';
 import { AppMaterialModule as MaterialModule } from './material/material.module';
+import { TileDisplayComponent } from './home/tile-display/tile-display.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { AppMaterialModule as MaterialModule } from './material/material.module'
     MultiplierClassPipe,
     MovesDisplayComponent,
     PlayersDisplayComponent,
+    TileDisplayComponent,
   ],
   imports: [
     BrowserModule,

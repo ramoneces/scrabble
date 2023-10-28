@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Observable, Subject, debounceTime, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, debounceTime, tap } from 'rxjs';
 import { GameManager } from '../game/game.manager';
 import { Player } from '../game/player';
 import { Game, MultiplierKind } from '../game/scrabble.models';
@@ -15,6 +15,8 @@ export class HomeComponent implements OnDestroy {
   MultiplierKind = MultiplierKind;
 
   refreshGame$ = new Subject<void>();
+
+  pauseGame$ = new BehaviorSubject<boolean>(false);
 
   game$?: Observable<Game>;
 
@@ -62,7 +64,7 @@ export class HomeComponent implements OnDestroy {
           new Player('Player 2', this.rnd, game),
           new Player('Player 3', this.rnd, game)
         );
-        this.gameManager.begin(game, this.botThinkTimeMs);
+        this.gameManager.begin(game, this.botThinkTimeMs, this.pauseGame$);
       })
     );
   }

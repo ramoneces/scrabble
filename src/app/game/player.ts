@@ -58,19 +58,19 @@ export class Player {
 
     const maxScore = Math.max(...scores);
     const bestMoves = movesByScore[maxScore];
-    console.log(
-      this.name,
-      Object.values(movesByScore).map((m) =>
-        m.map((m) => ({
-          score: m.score,
-          word: m.moveWord.word.keys,
-        }))
-      ),
-      ...bestMoves.map((m) => ({
-        score: m.score,
-        word: m.moveWord.word.keys,
-      }))
-    );
+    // console.log(
+    //   this.name,
+    //   Object.values(movesByScore).map((m) =>
+    //     m.map((m) => ({
+    //       score: m.score,
+    //       word: m.moveWord.word.keys,
+    //     }))
+    //   ),
+    //   ...bestMoves.map((m) => ({
+    //     score: m.score,
+    //     word: m.moveWord.word.keys,
+    //   }))
+    // );
 
     // Return a random move for now
     return bestMoves[Math.floor(this.rnd.next() * bestMoves.length)];

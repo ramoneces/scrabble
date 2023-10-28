@@ -24,6 +24,13 @@
             />
             <span matSuffix>ms</span>
           </mat-form-field>
+          <button
+            mat-icon-button
+            color="accent"
+            (click)="pauseGame$.next(!pauseGame$.value)"
+          >
+            <mat-icon>{{ pauseGame$.value ? "play_arrow" : "pause" }}</mat-icon>
+          </button>
         </div>
         <table class="board">
           <tbody>
@@ -38,16 +45,11 @@
                     {{ multiplier.value
                     }}{{ MultiplierKind[multiplier.kind][0] | uppercase }}
                   </span>
-                  <div
+                  <app-tile-display
                     *ngIf="square.tile as tile"
-                    class="tile"
-                    [class.blank]="tile.isBlank"
-                    matRipple
+                    [tile]="tile"
                     (click)="gameManager.toggleTileMoveSelection(game, tile)"
-                  >
-                    <span class="letter">{{ tile.text }}</span
-                    ><span class="value">{{ tile.value }}</span>
-                  </div>
+                  ></app-tile-display>
                 </div>
               </td>
             </tr>
@@ -62,7 +64,7 @@
           ></app-moves-display
         ></mat-tab>
         <mat-tab label="Players"
-          ><app-players-display></app-players-display
+          ><app-players-display [players]="game.players"></app-players-display
         ></mat-tab>
         <mat-tab label="Pile">Content 3</mat-tab>
       </mat-tab-group>
