@@ -34,7 +34,7 @@ export class Player {
       [Direction.Horizontal, Direction.Vertical],
       (direction) =>
         mapMany(this.game.board.squares, (startingSquare) =>
-          this.findWordsInDirection(
+          this.findMovesInDirection(
             this.game.moves.length === 0,
             startingSquare,
             direction,
@@ -104,7 +104,7 @@ export class Player {
 
   //#endregion
 
-  private findWordsInDirection(
+  private findMovesInDirection(
     isFirstMove: boolean,
     currentSquare: Square | undefined,
     d: Direction,
@@ -207,7 +207,7 @@ export class Player {
         }
 
         result.push(
-          ...this.findWordsInDirection(
+          ...this.findMovesInDirection(
             isFirstMove,
             currentSquare.next[d],
             d,
@@ -293,6 +293,9 @@ export class Player {
       moveWord,
       connectedWords,
       score: moveWord.score + sumBy(connectedWords, (cw) => cw.score),
+      isBingo:
+        moveWord.squares.filter((s) => !s.tile).length ===
+        this.game.rules.rackSize,
     };
   }
 

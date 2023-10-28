@@ -10,9 +10,11 @@
       <span class="move-number">{{ moveIndex + 1 }}</span>
       <span class="player">{{ move.player.name }}</span>
     </div>
+
     <div class="score-column d--f">
       <span class="score">{{ move.score }}</span>
     </div>
+
     <div class="words-column d--f fd--c ai--fs">
       <span
         class="word main d--if"
@@ -30,5 +32,9 @@
         >
       </div>
     </div>
+
+    <mat-icon *ngIf="move.isBingo" color="accent" matTooltip="Bingo!"
+      >star</mat-icon
+    >
   </div>
 </div>

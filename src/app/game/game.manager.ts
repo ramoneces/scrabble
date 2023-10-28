@@ -12,6 +12,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { environment } from 'src/environments/environment.development';
+import { groupBy, last, orderBy, sumBy } from '../utils/array.utils';
 import { takeUntilConsecutiveDuplicates } from '../utils/rxjs.utils';
 import { BoardManager } from './board.manager';
 import { LexiconManager } from './lexicon.manager';
@@ -31,14 +32,17 @@ export class GameManager {
   initializeGame(...players: Player[]): Observable<Game> {
     return forkJoin([this.getLexicon(), this.getRules()]).pipe(
       map(([lexiconData, rules]) => {
-        return {
+        const game: Game = {
           rules,
           players,
           lexicon: this.lexiconManager.buildLexicon(lexiconData, rules),
           board: this.boardManager.buildBoard(rules),
           tileSet: this.tileSetManager.buildTileSet(rules),
           moves: [],
+          winners: [],
         };
+
+        return game;
       }),
       tap(console.log)
     );
@@ -82,8 +86,62 @@ export class GameManager {
         )
       )
       .subscribe({
-        complete: () => console.log('Game over'),
+        complete: () => {
+          this.finishGame(game);
+          console.log('Game over');
+        },
       });
+  }
+
+  private finishGame(game: Game) {
+    const provisionalWinners = this.getWinners(game);
+
+    this.applyUnplayedTiles(game);
+
+    const winners = this.getWinners(game);
+
+    this.proclaimWinners(game, provisionalWinners, winners);
+  }
+
+  private proclaimWinners(
+    game: Game,
+    provisionalWinners: Player[],
+    winners: Player[]
+  ) {
+    // The player with the highest final score wins the game. In case of a tie, the player with the highest score before adding or deducting unplayed letters wins.
+
+    if (winners.length === 1 || provisionalWinners.length > 1) {
+      game.winners = winners;
+    } else {
+      game.winners = provisionalWinners;
+    }
+  }
+
+  private getWinners(game: Game): Player[] {
+    const playersByScoreAscending = groupBy(
+      orderBy(game.players, (player) => player.score),
+      (player) => player.score
+    );
+
+    return last(Object.values(playersByScoreAscending))!;
+  }
+
+  private applyUnplayedTiles(game: Game) {
+    // When the game ends, each player's score is reduced by the sum of his or her unplayed letters.
+    let unplayedTilesScore = 0;
+    game.players.forEach((player) => {
+      const playerUnplayedTilesScore = sumBy(player.rack, (tile) => tile.value);
+      player.score -= playerUnplayedTilesScore;
+
+      unplayedTilesScore += playerUnplayedTilesScore;
+    });
+
+    // In addition, if a player has used all of his or her letters, the sum of the other players' unplayed letters is added to that player's score.
+    game.players.forEach((player) => {
+      if (player.rack.length === 0) {
+        player.score += unplayedTilesScore;
+      }
+    });
   }
 
   toggleTileMoveSelection(game: Game, tile: Tile) {

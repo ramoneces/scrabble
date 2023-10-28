@@ -7,6 +7,7 @@ export interface Game {
   lexicon: Lexicon;
   rules: ScrabbleRules;
   moves: Move[];
+  winners: Player[];
 }
 
 export interface TileSet {
@@ -85,6 +86,7 @@ export interface Move {
   moveWord: MoveWord;
   connectedWords: MoveWord[];
   score: number;
+  isBingo: boolean;
   isSelected?: boolean;
 }
 

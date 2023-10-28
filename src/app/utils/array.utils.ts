@@ -68,3 +68,7 @@ export function indexMapBy<TItem, TKey extends string | number, TValue>(
   });
   return map;
 }
+
+export function last<TItem>(items: TItem[]): TItem | undefined {
+  return items.length > 0 ? items[items.length - 1] : undefined;
+}

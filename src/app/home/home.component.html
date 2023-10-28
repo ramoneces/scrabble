@@ -2,7 +2,7 @@
   <mat-card-content *ngIf="game$ | async as game">
     <div id="wrapper" class="d--f ai--fs">
       <div id="left" class="d--f fd--c">
-        <div id="config" class="d--if">
+        <div id="config" class="d--if g--0-5">
           <mat-form-field appearance="outline">
             <mat-label>Seed</mat-label>
             <input
@@ -64,10 +64,17 @@
           ></app-moves-display
         ></mat-tab>
         <mat-tab label="Players"
-          ><app-players-display [players]="game.players"></app-players-display
-        ></mat-tab>
-        <mat-tab label="Pile">Content 3</mat-tab>
+          ><app-players-display
+            [players]="game.players"
+            [winners]="game.winners"
+          ></app-players-display>
+          <div class="pile d--f fw--w">
+            <app-tile-display
+              *ngFor="let tile of game.tileSet.pile"
+              [tile]="tile"
+            ></app-tile-display>
+          </div>
+        </mat-tab>
       </mat-tab-group>
-    </div>
-  </mat-card-content></mat-card
->
+    </div> </mat-card-content
+></mat-card>

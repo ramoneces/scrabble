@@ -8,4 +8,5 @@ import { Player } from 'src/app/game/player';
 })
 export class PlayersDisplayComponent {
   @Input() players: Player[] = [];
+  @Input() winners: Player[] = [];
 }

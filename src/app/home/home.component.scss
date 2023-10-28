@@ -1,51 +1,53 @@
 @import "../../styles/styles.scss";
 
-.square {
-  background-color: #8b8b8b80;
-  width: 2.2rem;
-  height: 2.2rem;
-  padding: 0.25rem;
-  position: relative;
-  user-select: none;
+.board {
+  .square {
+    background-color: #8b8b8b80;
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0.25rem;
+    position: relative;
+    user-select: none;
 
-  &.multiplier {
-    background-color: $unknown-multiplier-color;
+    &.multiplier {
+      background-color: $unknown-multiplier-color;
 
-    &.letter-x2 {
-      background-color: $letter-2x-color;
-    }
-    &.letter-x3 {
-      background-color: $letter-3x-color;
-    }
-    &.word-x2 {
-      background-color: $word-2x-color;
-    }
-    &.word-x3 {
-      background-color: $word-3x-color;
+      &.letter-x2 {
+        background-color: $letter-2x-color;
+      }
+      &.letter-x3 {
+        background-color: $letter-3x-color;
+      }
+      &.word-x2 {
+        background-color: $word-2x-color;
+      }
+      &.word-x3 {
+        background-color: $word-3x-color;
+      }
+
+      .label {
+        color: white;
+        opacity: 0.5;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5rem;
+        font-weight: lighter;
+      }
     }
 
-    .label {
-      color: white;
-      opacity: 0.5;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 1.5rem;
-      font-weight: lighter;
+    &.selected {
+      outline: 2px solid $accent-color;
+      box-shadow: 0px 0px 10px $accent-color;
     }
   }
 
-  &.selected {
-    outline: 2px solid $accent-color;
-    box-shadow: 0px 0px 10px $accent-color;
+  app-tile-display {
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
   }
-}
-
-app-tile-display {
-  height: 100%;
-  width: 100%;
-  cursor: pointer;
 }
 
 mat-tab-group {
@@ -58,4 +60,20 @@ mat-card-content,
 mat-tab-group {
   height: 98%;
   max-height: 98%;
+}
+
+.pile {
+  gap: 0.5rem;
+  margin-top: 3rem;
+
+  app-tile-display {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+#config {
+  mat-form-field {
+    width: 7rem;
+  }
 }
