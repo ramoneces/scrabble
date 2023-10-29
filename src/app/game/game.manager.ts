@@ -191,7 +191,7 @@ export class GameManager {
   }
 
   private getLexicon(): Observable<string> {
-    return this.http.get(`assets/lexicon.${environment.language}.txt`, {
+    return this.http.get(`assets/${environment.language}.lexicon`, {
       responseType: 'text',
     });
   }
