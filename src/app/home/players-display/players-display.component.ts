@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Player } from 'src/app/game/player';
+import { Player } from 'src/app/game/scrabble.models';
 
 @Component({
   selector: 'app-players-display',

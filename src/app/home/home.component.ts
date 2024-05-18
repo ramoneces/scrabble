@@ -1,7 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, debounceTime, tap } from 'rxjs';
 import { GameManager } from '../game/game.manager';
-import { Player } from '../game/player';
 import { Game, MultiplierKind } from '../game/scrabble.models';
 import { RandomNumberGenerator } from '../utils/random-number.generator';
 
@@ -60,9 +59,9 @@ export class HomeComponent implements OnDestroy {
       tap((game) => {
         this.gameManager.addPlayers(
           game,
-          new Player('Player 1', this.rnd, game),
-          new Player('Player 2', this.rnd, game),
-          new Player('Player 3', this.rnd, game)
+          { name: 'Player 1', rack: [], score: 0 },
+          { name: 'Player 2', rack: [], score: 0 },
+          { name: 'Player 3', rack: [], score: 0 }
         );
         this.gameManager.begin(game, this.botThinkTimeMs, this.pauseGame$);
       })

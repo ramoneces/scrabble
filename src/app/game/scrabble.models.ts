@@ -1,5 +1,3 @@
-import { Player } from './player';
-
 export interface Game {
   players: Player[];
   board: Board;
@@ -8,6 +6,12 @@ export interface Game {
   rules: ScrabbleRules;
   moves: Move[];
   winners: Player[];
+}
+
+export interface Player {
+  name: string;
+  score: number;
+  rack: Tile[];
 }
 
 export interface TileSet {

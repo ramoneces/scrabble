@@ -16,8 +16,8 @@ import { groupBy, last, orderBy, sumBy } from '../utils/array.utils';
 import { takeUntilConsecutiveDuplicates } from '../utils/rxjs.utils';
 import { BoardManager } from './board.manager';
 import { LexiconManager } from './lexicon.manager';
-import { Player } from './player';
-import { Game, Move, ScrabbleRules, Tile } from './scrabble.models';
+import { MoveFinder } from './move.finder';
+import { Game, Move, Player, ScrabbleRules, Tile } from './scrabble.models';
 import { TileSetManager } from './tile-set.manager';
 
 @Injectable({ providedIn: 'root' })
@@ -26,7 +26,8 @@ export class GameManager {
     private http: HttpClient,
     private boardManager: BoardManager,
     private tileSetManager: TileSetManager,
-    private lexiconManager: LexiconManager
+    private lexiconManager: LexiconManager,
+    private moveFinder: MoveFinder
   ) {}
 
   initializeGame(...players: Player[]): Observable<Game> {
@@ -54,7 +55,10 @@ export class GameManager {
 
   begin(game: Game, thinkTime: number, paused$: Observable<boolean>) {
     game.players.forEach((player) => {
-      player.takeTiles(this.tileSetManager.drawRandomTiles(game.tileSet, 7));
+      this.takeTiles(
+        player,
+        this.tileSetManager.drawRandomTiles(game.tileSet, 7)
+      );
     });
 
     interval(thinkTime)
@@ -64,12 +68,16 @@ export class GameManager {
         map((_, turnIndex) => turnIndex), // Keep track of turns
         takeWhile(() => game.players.some((player) => player.rack.length > 0)), // While some players can still play
         map((turnIndex) =>
-          game.players[turnIndex % game.players.length].getMove()
+          this.moveFinder.findMove(
+            game,
+            game.players[turnIndex % game.players.length]
+          )
         ), // Get move from next player
         tap((move) => {
           if (move) {
             this.applyMove(game, move);
-            move.player.takeTiles(
+            this.takeTiles(
+              move.player,
               this.tileSetManager.drawRandomTiles(
                 game.tileSet,
                 game.rules.rackSize - move.player.rack.length
@@ -91,6 +99,10 @@ export class GameManager {
           console.log('Game over');
         },
       });
+  }
+
+  private takeTiles(player: Player, tiles: Tile[]) {
+    player.rack.push(...tiles);
   }
 
   private finishGame(game: Game) {

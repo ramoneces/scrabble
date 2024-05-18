@@ -57,12 +57,6 @@
         </table>
       </div>
       <mat-tab-group animationDuration="0ms">
-        <mat-tab label="Moves"
-          ><app-moves-display
-            [moves]="game.moves"
-            (moveClicked)="gameManager.toggleMoveSelection(game, $event)"
-          ></app-moves-display
-        ></mat-tab>
         <mat-tab label="Players"
           ><app-players-display
             [players]="game.players"
@@ -75,6 +69,12 @@
             ></app-tile-display>
           </div>
         </mat-tab>
+        <mat-tab label="Moves"
+          ><app-moves-display
+            [moves]="game.moves"
+            (moveClicked)="gameManager.toggleMoveSelection(game, $event)"
+          ></app-moves-display
+        ></mat-tab>
       </mat-tab-group>
     </div> </mat-card-content
 ></mat-card>
